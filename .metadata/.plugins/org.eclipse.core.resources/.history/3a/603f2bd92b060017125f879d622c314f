@@ -1,0 +1,23 @@
+import java.util.*;
+import java.io.*;
+
+public class StoreCredit {
+	
+	public static void main(String[] args){
+		Scanner in = new Scanner(new BufferedReader(new InputStreamReader(System.in)));
+		int n = in.nextInt();
+		int c, l;
+		List<Integer> items;
+		
+		for(int i = 1; i <= n; ++i){
+			c = in.nextInt();
+			l = in.nextInt();
+			items = new ArrayList(l);
+			for(int e = 1; e <= l; ++e){
+				items.add(in.nextInt());
+			}
+			System.out.println("Case #"+i+" "+items.get(0)+" "+items.get(1)+" "+items.get(2));
+		}
+	}
+
+}

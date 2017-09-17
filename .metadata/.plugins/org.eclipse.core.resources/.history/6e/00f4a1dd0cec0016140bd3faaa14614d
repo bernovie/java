@@ -1,0 +1,169 @@
+package org.usfirst.frc.team5526.robot;
+
+import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.RobotDrive;
+import edu.wpi.first.wpilibj.SpeedController;
+import edu.wpi.first.wpilibj.Talon;
+import edu.wpi.first.wpilibj.SampleRobot;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.Ultrasonic;
+import edu.wpi.first.wpilibj.Victor;
+import edu.wpi.first.wpilibj.AnalogGyro;
+
+/**
+ * This sample program shows how to control a motor using a joystick. In the
+ * operator control part of the program, the joystick is read and the value is
+ * written to the motor.
+ *
+ * Joystick analog values range from -1 to 1 and speed controller inputs also
+ * range from -1 to 1 making it easy to work together. The program also delays a
+ * short time in the loop to allow other threads to run. This is generally a
+ * good idea, especially since the joystick values are only transmitted from the
+ * Driver Station once every 20ms.
+ */
+public class Robot extends SampleRobot {
+	RobotDrive myRobot;
+	RobotDrive robot;
+	private SpeedController motor; // initialize the motor as a
+	private SpeedController wrist;
+	private SpeedController fingers;
+	
+	private Joystick stick;  // initialize the joystick on port
+												// 0
+	//private CameraServer server;
+	
+	private Ultrasonic ultraSonicSensor;
+	
+	AnalogGyro gyro;
+	
+	private boolean button1;
+	private boolean button3;
+	private boolean button4, button2;
+	private final double kUpdatePeriod = 0.005; // update every 0.005 seconds/5
+	static final double Kp = 0.105;											// milliseconds (200Hz)
+	static final int lineButton = 2;
+	
+	int contador;
+	
+	public Robot() {
+		myRobot = new RobotDrive(1,2, 3,4);
+		myRobot.setExpiration(0.1);
+		motor = new Talon(5);
+		stick = new Joystick(0);
+		wrist = new Victor(6);
+		fingers = new Victor(7);
+		//server = CameraServer.getInstance();
+		//server.startAutomaticCapture();
+		button1 = false;
+		button3 = false;
+		button4 = false;
+		button2 = false;
+		contador = 0;
+		
+		gyro = new AnalogGyro(1);
+	}
+	
+	public void autonomous(){
+		/*gyro.reset();
+		while(isAutonomous()&&isEnabled()){	
+			double angle = gyro.getAngle();
+				myRobot.arcadeDrive(1.0, -angle*Kp);
+				Timer.delay(0.01);
+		}*/
+		if(isAutonomous() && isEnabled()){
+			System.out.println("Autonomous Activated");
+			myRobot.arcadeDrive(-1, 0.0);
+			Timer.delay(2);
+		}
+		
+		myRobot.stopMotor();
+	}
+	/**
+	 * Runs the motor from a joystick.
+	 */
+	@Override
+	public void operatorControl() {
+		myRobot.setSafetyEnabled(true);
+		double l=0, r=0, angle = 0;
+		long contInterno = 0, contExterno = 0;
+		while (isOperatorControl() && isEnabled()) {
+			// Set the motor's output.
+			// This takes a number from -1 (100% speed in reverse) to +1 (100%
+			// speed going forward)
+			
+			//System.out.println("Interno: "+ contInterno + " Externo: "+ contExterno);
+			//Timer.delay(0.5);
+			if(stick.getRawButton(1)) button1 = !button1;
+			if(stick.getRawButton(lineButton)) button2 = true;
+			
+			if(stick.getRawButton(5)){
+				gyro.reset();
+				while(gyro.getAngle() < 45){
+					myRobot.drive(0.0, -0.5);
+				}
+			}
+			
+			if(button2){
+				if(contInterno != contExterno || (contInterno == 0 && contExterno == 0) ){
+					gyro.reset();
+					contInterno = 0;
+					contExterno = 0;
+				}
+				contInterno++;
+				angle = gyro.getAngle();
+				myRobot.drive(1.0, angle*Kp);
+				Timer.delay(0.005);
+			}
+			System.out.println("Angle: "+gyro.getAngle());
+			
+			if(stick.getRawButton(3)){
+				button3 = !button3;
+				button4 = false;
+			}
+			
+			if(stick.getRawButton(4)){
+				button4 = !button4;
+				button3 = false;
+			}
+			
+			if(button3){
+				fingers.set(1);
+			}
+			else{
+				fingers.set(0);
+			}
+			
+			if(button4){
+				fingers.set(-1);
+			}
+			if(button1){
+				double y = -stick.getRawAxis(1);
+				double w = stick.getRawAxis(4);
+			
+				motor.set(y);
+				//System.out.println(y);
+				wrist.set(w);
+			}
+			else {
+				if(Robot.isSimulation()){
+					l = -stick.getRawAxis(1);
+					r = -stick.getRawAxis(4);
+					}
+				else {
+					l = -stick.getRawAxis(1);
+					r = -stick.getRawAxis(4);
+				}
+				//myRobot.tankDrive(l, r);
+				myRobot.arcadeDrive(-stick.getRawAxis(1), -stick.getZ(), true);
+				//System.out.println("Z axis: "+stick.getZ()+" Throttle: "+Math.abs((stick.getThrottle()-1)/2));
+				//System.out.println("Y-axis Hat: "+((stick.getRawAxis(2)-0.75)/0.25)+" X-axis Hat: "+stick.getRawAxis(3));
+				//myRobot.arcadeDrive(-stick.getRawAxis(1), -stick.getRawAxis(0), true);
+				//System.out.println(l+" "+r);
+			}
+			button2 = false;
+			contExterno++;
+			Timer.delay(kUpdatePeriod); // wait 5ms to the next update
+		}
+	}
+}

@@ -1,0 +1,24 @@
+INDEX VERSION 1.129+/Users/berny/Documents/workspace/.metadata/.plugins/org.eclipse.jdt.core
+4294802346.index
+3199470251.index
+1042971534.index
+2037535791.index
+714734470.index
+3130597788.index
+121889174.index
+637757141.index
+3423572169.index
+4124696509.index
+121943701.index
+2897016080.index
+2441529098.index
+4070755256.index
+1048379987.index
+4158299438.index
+2709977886.index
+1690594554.index
+65358904.index
+1617720029.index
+2883310413.index
+2089348824.index
+494430282.index
